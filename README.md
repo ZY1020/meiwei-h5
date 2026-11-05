@@ -4,7 +4,7 @@
 
 ## 已实现页面
 
-- 2 秒品牌加载页，可点击图片中的“跳过”区域立即进入。
+- 5 秒品牌加载页，可点击图片中的“跳过”区域立即进入。
 - 首页：堂食/打包入口、今日蒸鲜、会员中心、蓝印故事。
 - 菜单：22 道菜、分类定位、搜索、菜品规格、数量与购物车联动。
 - 确认订单：堂食/打包切换、备注、满 50 元减 10 元演示券、金额计算。
@@ -32,7 +32,7 @@ python -m http.server 8000
 
 ## 静态发布
 
-当前 GitHub Pages 地址：`https://zy1020.github.io/meiwei-h5/`。扫描项目根目录的 `meiwei-qr.png` 即可从加载页进入；二维码入口带有缓存版本参数，等待 2 秒自动进入首页，也可以点击图片中的“跳过”。
+当前 CloudBase 演示地址：`https://zzw-h5-zzw-h5-d5glrewp1a13e612f.webapps.tcloudbase.com/`。GitHub Pages 备用地址：`https://zy1020.github.io/meiwei-h5/`。扫描项目根目录的 `meiwei-qr.png` 即可从加载页进入；二维码入口带有缓存版本参数，等待 5 秒自动进入首页，也可以点击图片中的“跳过”。
 
 发布前请确认图片素材授权与实际品牌使用范围；购物车和订单仍只保存在访问者当前浏览器的 `localStorage` 中。
 
@@ -45,5 +45,5 @@ python generate_qr.py https://你的实际网址/
 本项目实际生成命令：
 
 ```powershell
-python generate_qr.py "https://zy1020.github.io/meiwei-h5/?v=20261105-10"
+python generate_qr.py "https://zzw-h5-zzw-h5-d5glrewp1a13e612f.webapps.tcloudbase.com/?v=20261105-10"
 ```
