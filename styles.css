@@ -41,16 +41,16 @@ img { display: block; max-width: 100%; }
   right: 5.4%;
   width: 76px;
   height: 38px;
-  border: 1px solid rgba(255,255,255,.65);
+  border: 0;
   border-radius: 22px;
-  color: white;
-  background: rgba(9, 19, 32, .22);
+  color: transparent;
+  background: transparent;
   font-size: 16px;
   cursor: pointer;
-  backdrop-filter: blur(3px);
 }
+.splash-skip:focus-visible { outline: 2px solid white; outline-offset: 2px; }
 .splash-progress { position: absolute; left: 16%; right: 16%; bottom: 7.6%; height: 5px; overflow: hidden; border-radius: 8px; background: rgba(255,255,255,.24); }
-.splash-progress span { display: block; width: 0; height: 100%; background: #fff4dd; animation: loading 5s linear forwards; }
+.splash-progress span { display: block; width: 0; height: 100%; background: #fff4dd; animation: loading 2s linear forwards; }
 @keyframes loading { to { width: 100%; } }
 
 .app { min-height: 100dvh; padding-bottom: calc(68px + env(safe-area-inset-bottom)); background: var(--cream); }

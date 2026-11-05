@@ -430,13 +430,12 @@ document.addEventListener('click', event => {
 });
 
 $('skipSplash').addEventListener('click', enterApp);
-let splashTimer = setTimeout(enterApp, 5000);
+let splashTimer = setTimeout(enterApp, 2000);
 
 function enterApp() {
   clearTimeout(splashTimer);
   $('splash').classList.add('is-hidden');
   $('app').classList.remove('is-hidden');
-  render();
 }
 
 render();

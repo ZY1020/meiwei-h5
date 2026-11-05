@@ -49,7 +49,7 @@ function Save-JpegCrop {
 }
 
 $splash = Join-Path $DesignRoot '1加载页\加载页_画板 1.jpg'
-Save-JpegCrop $splash (Join-Path $OutputRoot 'splash.jpg') 0 0 4688 10150 1172
+Save-JpegCrop $splash (Join-Path $OutputRoot 'splash.jpg') 0 0 4688 10150 900
 
 $homeSource = Join-Path $DesignRoot '2首页\原图\首页_画板 1 副本.jpg'
 Save-JpegCrop $homeSource (Join-Path $OutputRoot 'home-hero.jpg') 170 1520 4340 2580 1600
