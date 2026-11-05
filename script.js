@@ -1,7 +1,7 @@
 'use strict';
 
 const ASSET = 'assets/brand/';
-const ASSET_VERSION = '?v=20261105-9';
+const ASSET_VERSION = '?v=20261105-10';
 const CART_KEY = 'zhengzhiwei_cart_v2';
 const ORDERS_KEY = 'zhengzhiwei_orders_v2';
 const COUPON_KEY = 'zhengzhiwei_coupon_claimed';
@@ -217,13 +217,24 @@ function renderHome() {
   </div>`;
 }
 
-function renderMenu() {
+function menuSectionsMarkup() {
   const query = state.search.trim().toLowerCase();
-  const sections = categories.map(category => {
-    const items = dishes.filter(dish => dish.category === category && (!query || `${dish.name}${dish.en}${dish.tags.join('')}`.toLowerCase().includes(query)));
+  return categories.map(category => {
+    const items = dishes.filter(dish => dish.category === category && (!query || dish.name.toLowerCase().includes(query)));
     if (!items.length) return '';
     return `<section class="menu-section" id="category-${category}"><h2>${category}</h2>${items.map(dishCard).join('')}</section>`;
   }).join('');
+}
+
+function updateMenuResults() {
+  const content = document.querySelector('.menu-content');
+  if (!content) return;
+  content.innerHTML = menuSectionsMarkup() || '<div class="empty-state">没有找到相关菜品</div>';
+  requestAnimationFrame(() => loadDeferredImages(content));
+}
+
+function renderMenu() {
+  const sections = menuSectionsMarkup();
   return `<div class="location-row page-pad" style="padding-bottom:0"><div class="location-main"><strong>⌖　蒸知味·天门店</strong><small>堂食点单 · A01桌</small></div><button class="switch-link" data-action="switch-store">⇄ 切换 ›</button></div>
     <label class="search-box"><input id="menuSearch" type="search" value="${escapeAttribute(state.search)}" placeholder="搜索想吃的蒸菜" aria-label="搜索菜品"></label>
     <div class="menu-slogan">✣　现点现蒸，一笼鲜香</div>
@@ -348,15 +359,19 @@ function attachViewListeners() {
     attachViewListeners.orderTimer = null;
   }
   const input = $('menuSearch');
-  if (input) input.addEventListener('input', event => {
-    const position = event.target.selectionStart;
-    state.search = event.target.value;
-    $('view').innerHTML = renderMenu();
-    const next = $('menuSearch');
-    next.focus();
-    next.setSelectionRange(position, position);
-    attachViewListeners();
-  });
+  if (input) {
+    input.addEventListener('compositionstart', () => { input.dataset.composing = 'true'; });
+    input.addEventListener('compositionend', event => {
+      input.dataset.composing = 'false';
+      state.search = event.target.value;
+      updateMenuResults();
+    });
+    input.addEventListener('input', event => {
+      state.search = event.target.value;
+      if (event.isComposing || input.dataset.composing === 'true') return;
+      updateMenuResults();
+    });
+  }
   if (state.view === 'menu' && !state.search.trim()) {
     attachViewListeners.menuScrollHandler = () => {
       let current = categories[0];
