@@ -49,17 +49,17 @@ function Save-JpegCrop {
 }
 
 $splash = Join-Path $DesignRoot '1加载页\加载页_画板 1.jpg'
-Save-JpegCrop $splash (Join-Path $OutputRoot 'splash.jpg') 0 0 4688 10150 900
+Save-JpegCrop $splash (Join-Path $OutputRoot 'splash.jpg') 0 0 4688 10150 800
 
 $homeSource = Join-Path $DesignRoot '2首页\原图\首页_画板 1 副本.jpg'
-Save-JpegCrop $homeSource (Join-Path $OutputRoot 'home-hero.jpg') 170 1520 4340 2580 1600
+Save-JpegCrop $homeSource (Join-Path $OutputRoot 'home-hero.jpg') 170 1520 4340 2580 960
 
 $story = Join-Path $DesignRoot '2首页\原图\蓝印故事\完整长图.jpg'
-Save-JpegCrop $story (Join-Path $OutputRoot 'story\full.jpg') 0 0 4688 32325 1172
-Save-JpegCrop $story (Join-Path $OutputRoot 'story\hero.jpg') 170 660 4340 4240 1400
-Save-JpegCrop $story (Join-Path $OutputRoot 'story\craft.jpg') 170 9630 4340 5370 1400
-Save-JpegCrop $story (Join-Path $OutputRoot 'story\table.jpg') 170 22450 4340 3740 1400
-Save-JpegCrop $story (Join-Path $OutputRoot 'story\arrival.jpg') 170 28100 4340 3200 1400
+Save-JpegCrop $story (Join-Path $OutputRoot 'story\full.jpg') 0 0 4688 32325 900
+Save-JpegCrop $story (Join-Path $OutputRoot 'story\hero.jpg') 170 660 4340 4240 900
+Save-JpegCrop $story (Join-Path $OutputRoot 'story\craft.jpg') 170 9630 4340 5370 900
+Save-JpegCrop $story (Join-Path $OutputRoot 'story\table.jpg') 170 22450 4340 3740 900
+Save-JpegCrop $story (Join-Path $OutputRoot 'story\arrival.jpg') 170 28100 4340 3200 900
 
 $patternSources = @(
   @('pattern-2.jpg', '交互切换2.jpg'),
@@ -70,7 +70,7 @@ $patternSources = @(
 foreach ($patternSource in $patternSources) {
   $sourcePath = Join-Path $DesignRoot ('2首页\原图\蓝印故事\' + $patternSource[1])
   $destinationPath = Join-Path $OutputRoot ('story\' + $patternSource[0])
-  Save-JpegCrop $sourcePath $destinationPath 0 0 4688 3788 1172
+  Save-JpegCrop $sourcePath $destinationPath 0 0 4688 3788 900
 }
 
 $menu = Join-Path $DesignRoot '3菜单页\菜单\完整菜单长图.jpg'
@@ -87,7 +87,7 @@ foreach ($dish in $dishCrops) {
   $destination = Join-Path $OutputRoot ('dishes\' + $dish[0] + '.jpg')
   # Use the exact image bounds from the source long image. The previous
   # accumulated offsets captured pieces of the next card and section headings.
-  Save-JpegCrop $menu $destination 1290 $dish[1] 1540 $dish[2] 900
+  Save-JpegCrop $menu $destination 1290 $dish[1] 1540 $dish[2] 540
 }
 
 Write-Output ('Extracted design assets to ' + $OutputRoot)

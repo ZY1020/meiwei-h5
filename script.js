@@ -1,6 +1,7 @@
 'use strict';
 
 const ASSET = 'assets/brand/';
+const ASSET_VERSION = '?v=20261105-7';
 const CART_KEY = 'zhengzhiwei_cart_v2';
 const ORDERS_KEY = 'zhengzhiwei_orders_v2';
 const COUPON_KEY = 'zhengzhiwei_coupon_claimed';
@@ -54,8 +55,34 @@ const state = {
 
 const $ = id => document.getElementById(id);
 const money = value => `¥${Number(value).toFixed(0)}`;
-const assetFor = dish => `${ASSET}dishes/${dish.image}`;
+const versionedAsset = path => `${ASSET}${path}${ASSET_VERSION}`;
+const assetFor = dish => versionedAsset(`dishes/${dish.image}`);
 const escapeAttribute = value => String(value).replace(/[&"<>]/g, char => ({ '&':'&amp;', '"':'&quot;', '<':'&lt;', '>':'&gt;' })[char]);
+
+function loadDeferredImages(root) {
+  const images = [...root.querySelectorAll('img[data-src]')];
+  if (!images.length) return;
+
+  const load = image => {
+    image.src = image.dataset.src;
+    image.removeAttribute('data-src');
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    images.forEach(load);
+    return;
+  }
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      load(entry.target);
+      observer.unobserve(entry.target);
+    });
+  }, { rootMargin: '300px 0px' });
+
+  images.forEach(image => observer.observe(image));
+}
 
 function readJson(key, fallback) {
   try {
@@ -153,15 +180,15 @@ function renderHome() {
   const featured = ['pork-belly','wuchang-fish','eel'].map(id => dishes.find(d => d.id === id));
   return `<div class="page-pad">
     <div class="location-row"><div class="location-main"><strong>⌖　蒸知味·天门店</strong><small>堂食点单 · A01桌</small></div><button class="switch-link" data-action="switch-store">⇄ 切换 ›</button></div>
-    <section class="hero-card"><img src="${ASSET}home-hero.jpg" alt="蒸知味招牌蒸菜"></section>
+    <section class="hero-card"><img src="${versionedAsset('home-hero.jpg')}" alt="蒸知味招牌蒸菜" decoding="async"></section>
     <section class="service-card" aria-label="用餐方式">
       <button class="service-option" data-action="service-menu" data-mode="dinein"><span class="service-icon">♨</span><span><strong>堂食点单　›</strong><small>扫码点单，即点即蒸</small></span></button>
       <button class="service-option" data-action="service-menu" data-mode="takeaway"><span class="service-icon">▣</span><span><strong>打包带走　›</strong><small>提前下单，到店直取</small></span></button>
     </section>
     <div class="section-heading"><h2>今日蒸鲜</h2><button class="text-link" data-action="navigate" data-view="menu">查看更多 ›</button></div>
-    <section class="today-grid">${featured.map(dish => `<button class="today-card" data-action="open-product" data-id="${dish.id}"><img src="${assetFor(dish)}" alt="${dish.name}"><span>${dish.name}<b class="round-plus">+</b></span></button>`).join('')}</section>
+    <section class="today-grid">${featured.map(dish => `<button class="today-card" data-action="open-product" data-id="${dish.id}"><img data-src="${assetFor(dish)}" alt="${dish.name}" loading="lazy" decoding="async"><span>${dish.name}<b class="round-plus">+</b></span></button>`).join('')}</section>
     <button class="member-banner full-button" data-action="navigate" data-view="member"><strong>蒸知味</strong><small>蒸味会员 · 积分享好礼</small><span>查看权益 ›</span></button>
-    <button class="story-entry" data-action="navigate" data-view="story"><img src="${ASSET}story/hero.jpg" alt="蓝印花布"><span><strong>一方蓝白，一笼家常</strong><small>蓝印花布里的蒸味故事</small></span><span>›</span></button>
+    <button class="story-entry" data-action="navigate" data-view="story"><img data-src="${versionedAsset('story/hero.jpg')}" alt="蓝印花布" loading="lazy" decoding="async"><span><strong>一方蓝白，一笼家常</strong><small>蓝印花布里的蒸味故事</small></span><span>›</span></button>
   </div>`;
 }
 
@@ -180,7 +207,7 @@ function renderMenu() {
 
 function dishCard(dish) {
   const qty = state.cart[dish.id]?.qty || 0;
-  return `<article class="dish-card" data-action="open-product" data-id="${dish.id}"><div class="dish-thumb"><img src="${assetFor(dish)}" alt="${dish.name}"></div><div class="dish-info"><h3>${dish.name}</h3><p>${dish.tags.join('，')}</p><span class="dish-price"><small>¥</small>${dish.price}</span></div><div class="qty-inline">${qty ? `<button class="minus" data-action="quick-minus" data-id="${dish.id}" aria-label="减少${dish.name}">−</button><b>${qty}</b>` : ''}<button data-action="open-product" data-id="${dish.id}" aria-label="选择${dish.name}">+</button></div></article>`;
+  return `<article class="dish-card" data-action="open-product" data-id="${dish.id}"><div class="dish-thumb"><img data-src="${assetFor(dish)}" alt="${dish.name}" loading="lazy" decoding="async"></div><div class="dish-info"><h3>${dish.name}</h3><p>${dish.tags.join('，')}</p><span class="dish-price"><small>¥</small>${dish.price}</span></div><div class="qty-inline">${qty ? `<button class="minus" data-action="quick-minus" data-id="${dish.id}" aria-label="减少${dish.name}">−</button><b>${qty}</b>` : ''}<button data-action="open-product" data-id="${dish.id}" aria-label="选择${dish.name}">+</button></div></article>`;
 }
 
 function openProduct(id) {
@@ -195,7 +222,7 @@ function renderModal() {
   if (!state.modal) return closeModal();
   const dish = dishes.find(item => item.id === state.modal.id);
   const scallionMarkup = dish.scallions ? `<div class="option-group"><h3>葱花 <small>（必选）</small></h3><div class="option-grid two">${dish.scallions.map(value => `<button class="option-button ${state.modal.scallion === value ? 'active' : ''}" data-action="select-option" data-group="scallion" data-value="${value}">${value}${state.modal.scallion === value ? '　✓' : ''}</button>`).join('')}</div></div>` : '';
-  $('modalRoot').innerHTML = `<div class="modal-backdrop"><section class="product-modal" role="dialog" aria-modal="true" aria-label="${dish.name}详情"><button class="modal-close" data-action="close-modal" aria-label="关闭">×</button><img class="product-image" src="${assetFor(dish)}" alt="${dish.name}"><div class="product-body"><div class="product-title-line"><h2>${dish.name}</h2><span class="badge">招牌</span></div><p class="english-name">${dish.en}</p><div class="flavor-tags">${dish.tags.map(tag => `<span>${tag}</span>`).join('')}</div><p class="description"><b>菜品介绍</b><br>${dish.desc}</p><div class="option-group"><h3>口味 <small>（必选）</small></h3><div class="option-grid ${dish.flavors.length === 2 ? 'two' : ''}">${dish.flavors.map(value => `<button class="option-button ${state.modal.flavor === value ? 'active' : ''}" data-action="select-option" data-group="flavor" data-value="${value}">${value}${state.modal.flavor === value ? '　✓' : ''}</button>`).join('')}</div></div>${scallionMarkup}<div class="selection-line">${selectionText(dish)}</div><div class="product-purchase"><span class="product-price"><small>¥</small>${dish.price}<small> / 份</small></span><div class="qty-inline"><button class="minus" data-action="modal-minus">−</button><b>${state.modal.qty}</b><button data-action="modal-plus">+</button></div></div><button class="primary-button full-button" data-action="add-to-cart">加入购物车</button></div></section></div>`;
+  $('modalRoot').innerHTML = `<div class="modal-backdrop"><section class="product-modal" role="dialog" aria-modal="true" aria-label="${dish.name}详情"><button class="modal-close" data-action="close-modal" aria-label="关闭">×</button><img class="product-image" src="${assetFor(dish)}" alt="${dish.name}" decoding="async"><div class="product-body"><div class="product-title-line"><h2>${dish.name}</h2><span class="badge">招牌</span></div><p class="english-name">${dish.en}</p><div class="flavor-tags">${dish.tags.map(tag => `<span>${tag}</span>`).join('')}</div><p class="description"><b>菜品介绍</b><br>${dish.desc}</p><div class="option-group"><h3>口味 <small>（必选）</small></h3><div class="option-grid ${dish.flavors.length === 2 ? 'two' : ''}">${dish.flavors.map(value => `<button class="option-button ${state.modal.flavor === value ? 'active' : ''}" data-action="select-option" data-group="flavor" data-value="${value}">${value}${state.modal.flavor === value ? '　✓' : ''}</button>`).join('')}</div></div>${scallionMarkup}<div class="selection-line">${selectionText(dish)}</div><div class="product-purchase"><span class="product-price"><small>¥</small>${dish.price}<small> / 份</small></span><div class="qty-inline"><button class="minus" data-action="modal-minus">−</button><b>${state.modal.qty}</b><button data-action="modal-plus">+</button></div></div><button class="primary-button full-button" data-action="add-to-cart">加入购物车</button></div></section></div>`;
   document.body.style.overflow = 'hidden';
 }
 
@@ -213,7 +240,7 @@ function renderCheckout() {
   const lines = cartLines();
   if (!lines.length) return `<div class="empty-state"><p>购物车还是空的</p><button class="primary-button" data-action="navigate" data-view="menu">去选菜</button></div>`;
   return `<div class="checkout-page"><section class="white-card store-card"><div class="store-title">⌖ 蒸知味·天门店</div><div class="mode-switch"><button class="${state.serviceMode === 'dinein' ? 'active' : ''}" data-action="set-mode" data-mode="dinein">♨　堂食</button><button class="${state.serviceMode === 'takeaway' ? 'active' : ''}" data-action="set-mode" data-mode="takeaway">▣　打包</button></div><div class="mode-meta"><span>${state.serviceMode === 'dinein' ? '桌号 A01' : '到店自取'}</span><span>${state.serviceMode === 'dinein' ? '2人用餐' : '预计 20 分钟'}</span></div></section>
-    <section class="white-card selected-list"><h2>已选菜品</h2>${lines.map(item => `<div class="checkout-dish"><img src="${assetFor(item)}" alt="${item.name}"><div><strong>${item.name}</strong><small> × ${item.qty}</small><br><small>${[item.flavor,item.scallion].filter(Boolean).join(' / ')}</small></div><span>${money(item.price * item.qty)}</span></div>`).join('')}</section>
+    <section class="white-card selected-list"><h2>已选菜品</h2>${lines.map(item => `<div class="checkout-dish"><img data-src="${assetFor(item)}" alt="${item.name}" loading="lazy" decoding="async"><div><strong>${item.name}</strong><small> × ${item.qty}</small><br><small>${[item.flavor,item.scallion].filter(Boolean).join(' / ')}</small></div><span>${money(item.price * item.qty)}</span></div>`).join('')}</section>
     <section class="white-card"><div class="setting-row"><strong>订单备注</strong><button data-action="edit-note">${state.note || '口味、忌口等'}　›</button></div><div class="setting-row"><strong>优惠券</strong><span>${discount() ? `已优惠 ${money(discount())}` : '暂无可用'}　›</span></div></section>
     <section class="white-card"><div class="amount-row"><span>商品金额</span><span>${money(cartSubtotal())}</span></div><div class="amount-row"><span>优惠金额</span><span class="discount">− ${money(discount())}</span></div><div class="amount-row total"><span>合计</span><span class="discount">${money(cartSubtotal() - discount())}</span></div></section>
     ${state.serviceMode === 'takeaway' ? '<p class="checkout-hint">打包订单请到店后凭订单号取餐</p>' : ''}</div><footer class="checkout-footer"><span>实付　<strong>${money(cartSubtotal() - discount())}</strong></span><button class="primary-button" data-action="place-order">确认下单</button></footer>`;
@@ -260,7 +287,7 @@ function renderOrders() {
 function orderCard(order) {
   const items = order.items.map(line => ({ ...dishes.find(d => d.id === line.id), ...line })).filter(item => item.name);
   const active = order.status !== 'completed';
-  return `<article class="order-card"><div class="order-head"><div><strong>▱ 蒸知味·天门店</strong><small>${order.mode === 'takeaway' ? '打包' : '堂食'} · ${order.createdAt}</small></div><span class="order-status">${active ? '制作中' : `共${order.count}份`}</span></div>${active ? `<div class="steps">${[['✓','已下单','done'],['✓','已接单','done'],['','制作中','current'],['','完成','']].map(step => `<span class="step ${step[2]}"><i>${step[0]}</i>${step[1]}</span>`).join('')}</div>` : ''}${items.map(item => `<div class="order-item"><img src="${assetFor(item)}" alt="${item.name}"><strong>${item.name}</strong><span>${money(item.price)} × ${item.qty}</span></div>`).join('')}<div class="order-total"><span>共${order.count}份</span><span>合计 <strong>${money(order.total)}</strong></span></div><div class="order-actions">${active ? '<button class="outline-button" data-action="contact">联系门店</button><button class="primary-button" data-action="navigate" data-view="menu">继续加菜</button>' : `<button class="outline-button" data-action="reorder" data-order="${order.id}">再来一单</button>`}</div></article>`;
+  return `<article class="order-card"><div class="order-head"><div><strong>▱ 蒸知味·天门店</strong><small>${order.mode === 'takeaway' ? '打包' : '堂食'} · ${order.createdAt}</small></div><span class="order-status">${active ? '制作中' : `共${order.count}份`}</span></div>${active ? `<div class="steps">${[['✓','已下单','done'],['✓','已接单','done'],['','制作中','current'],['','完成','']].map(step => `<span class="step ${step[2]}"><i>${step[0]}</i>${step[1]}</span>`).join('')}</div>` : ''}${items.map(item => `<div class="order-item"><img data-src="${assetFor(item)}" alt="${item.name}" loading="lazy" decoding="async"><strong>${item.name}</strong><span>${money(item.price)} × ${item.qty}</span></div>`).join('')}<div class="order-total"><span>共${order.count}份</span><span>合计 <strong>${money(order.total)}</strong></span></div><div class="order-actions">${active ? '<button class="outline-button" data-action="contact">联系门店</button><button class="primary-button" data-action="navigate" data-view="menu">继续加菜</button>' : `<button class="outline-button" data-action="reorder" data-order="${order.id}">再来一单</button>`}</div></article>`;
 }
 
 function renderProfile() {
@@ -277,8 +304,8 @@ function renderMember() {
 }
 
 function renderStory() {
-  const overlay = state.pattern > 0 ? `<img class="story-pattern-overlay" src="${ASSET}story/pattern-${state.pattern + 1}.jpg" alt="${patternStories[state.pattern].title}">` : '';
-  return `<article class="story-fidelity"><div class="story-artboard"><img class="story-full" src="${ASSET}story/full.jpg" alt="蓝印故事：一方蓝白，一笼家常，介绍蓝印花布工艺、品牌纹样与餐桌应用">${overlay}<button class="story-back-hotspot" data-action="back" aria-label="返回上一页"></button><div class="story-pattern-hotspots" aria-label="切换品牌纹样">${patternStories.map((item,index) => `<button data-action="pattern" data-index="${index}" aria-label="查看${item.title}" title="${item.title}"></button>`).join('')}</div><button class="story-arrival-hotspot" data-action="arrival" aria-label="进入到店体验"></button><div class="story-accessible-copy"><h2>蓝印故事</h2><p>蓝印花布，不只是传统印染技艺，也承载着朴素、丰盈与团圆的生活记忆。蒸知味将这份蓝白之美融入一餐一饭。</p><h3>${patternStories[state.pattern].title}</h3><p>${patternStories[state.pattern].text}</p></div></div></article>`;
+  const overlay = state.pattern > 0 ? `<img class="story-pattern-overlay" src="${versionedAsset(`story/pattern-${state.pattern + 1}.jpg`)}" alt="${patternStories[state.pattern].title}" decoding="async">` : '';
+  return `<article class="story-fidelity"><div class="story-artboard"><img class="story-full" src="${versionedAsset('story/full.jpg')}" alt="蓝印故事：一方蓝白，一笼家常，介绍蓝印花布工艺、品牌纹样与餐桌应用" decoding="async">${overlay}<button class="story-back-hotspot" data-action="back" aria-label="返回上一页"></button><div class="story-pattern-hotspots" aria-label="切换品牌纹样">${patternStories.map((item,index) => `<button data-action="pattern" data-index="${index}" aria-label="查看${item.title}" title="${item.title}"></button>`).join('')}</div><button class="story-arrival-hotspot" data-action="arrival" aria-label="进入到店体验"></button><div class="story-accessible-copy"><h2>蓝印故事</h2><p>蓝印花布，不只是传统印染技艺，也承载着朴素、丰盈与团圆的生活记忆。蒸知味将这份蓝白之美融入一餐一饭。</p><h3>${patternStories[state.pattern].title}</h3><p>${patternStories[state.pattern].text}</p></div></div></article>`;
 }
 
 function renderError() {
@@ -286,6 +313,7 @@ function renderError() {
 }
 
 function attachViewListeners() {
+  loadDeferredImages($('view'));
   if (attachViewListeners.menuScrollHandler) {
     window.removeEventListener('scroll', attachViewListeners.menuScrollHandler);
     attachViewListeners.menuScrollHandler = null;
@@ -431,11 +459,14 @@ document.addEventListener('click', event => {
 
 $('skipSplash').addEventListener('click', enterApp);
 let splashTimer = setTimeout(enterApp, 2000);
+let appRendered = false;
 
 function enterApp() {
   clearTimeout(splashTimer);
+  if (!appRendered) {
+    render();
+    appRendered = true;
+  }
   $('splash').classList.add('is-hidden');
   $('app').classList.remove('is-hidden');
 }
-
-render();

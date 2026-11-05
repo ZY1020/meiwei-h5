@@ -45,5 +45,5 @@ python generate_qr.py https://你的实际网址/
 本项目实际生成命令：
 
 ```powershell
-python generate_qr.py "https://zy1020.github.io/meiwei-h5/?v=20261105-6"
+python generate_qr.py "https://zy1020.github.io/meiwei-h5/?v=20261105-7"
 ```
