@@ -1,7 +1,7 @@
 'use strict';
 
 const ASSET = 'assets/brand/';
-const ASSET_VERSION = '?v=20261105-7';
+const ASSET_VERSION = '?v=20261105-8';
 const CART_KEY = 'zhengzhiwei_cart_v2';
 const ORDERS_KEY = 'zhengzhiwei_orders_v2';
 const COUPON_KEY = 'zhengzhiwei_coupon_claimed';
@@ -63,25 +63,50 @@ function loadDeferredImages(root) {
   const images = [...root.querySelectorAll('img[data-src]')];
   if (!images.length) return;
 
+  const pending = new Set(images);
+  let animationFrame = 0;
+
   const load = image => {
-    image.src = image.dataset.src;
+    const source = image.dataset.src;
+    if (!source) return;
+    image.addEventListener('error', () => {
+      if (image.dataset.retried === 'true') return;
+      image.dataset.retried = 'true';
+      const separator = source.includes('?') ? '&' : '?';
+      setTimeout(() => { image.src = `${source}${separator}retry=1`; }, 700);
+    }, { once: true });
+    image.src = source;
     image.removeAttribute('data-src');
+    pending.delete(image);
   };
 
-  if (!('IntersectionObserver' in window)) {
-    images.forEach(load);
-    return;
+  const cleanup = () => {
+    window.removeEventListener('scroll', scheduleCheck);
+    window.removeEventListener('resize', scheduleCheck);
+  };
+
+  const checkNearbyImages = () => {
+    animationFrame = 0;
+    pending.forEach(image => {
+      if (!image.isConnected) {
+        pending.delete(image);
+        return;
+      }
+      const rect = image.getBoundingClientRect();
+      if (rect.top <= window.innerHeight + 500 && rect.bottom >= -500) load(image);
+    });
+    if (!pending.size) cleanup();
+  };
+
+  function scheduleCheck() {
+    if (animationFrame) return;
+    animationFrame = requestAnimationFrame(checkNearbyImages);
   }
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      load(entry.target);
-      observer.unobserve(entry.target);
-    });
-  }, { rootMargin: '300px 0px' });
-
-  images.forEach(image => observer.observe(image));
+  window.addEventListener('scroll', scheduleCheck, { passive: true });
+  window.addEventListener('resize', scheduleCheck, { passive: true });
+  scheduleCheck();
+  setTimeout(scheduleCheck, 350);
 }
 
 function readJson(key, fallback) {
@@ -313,7 +338,7 @@ function renderError() {
 }
 
 function attachViewListeners() {
-  loadDeferredImages($('view'));
+  requestAnimationFrame(() => loadDeferredImages($('view')));
   if (attachViewListeners.menuScrollHandler) {
     window.removeEventListener('scroll', attachViewListeners.menuScrollHandler);
     attachViewListeners.menuScrollHandler = null;
@@ -463,10 +488,10 @@ let appRendered = false;
 
 function enterApp() {
   clearTimeout(splashTimer);
+  $('splash').classList.add('is-hidden');
+  $('app').classList.remove('is-hidden');
   if (!appRendered) {
     render();
     appRendered = true;
   }
-  $('splash').classList.add('is-hidden');
-  $('app').classList.remove('is-hidden');
 }
