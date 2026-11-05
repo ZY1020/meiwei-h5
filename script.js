@@ -1,7 +1,7 @@
 'use strict';
 
 const ASSET = 'assets/brand/';
-const ASSET_VERSION = '?v=20261105-8';
+const ASSET_VERSION = '?v=20261105-9';
 const CART_KEY = 'zhengzhiwei_cart_v2';
 const ORDERS_KEY = 'zhengzhiwei_orders_v2';
 const COUPON_KEY = 'zhengzhiwei_coupon_claimed';
@@ -483,7 +483,7 @@ document.addEventListener('click', event => {
 });
 
 $('skipSplash').addEventListener('click', enterApp);
-let splashTimer = setTimeout(enterApp, 2000);
+let splashTimer = setTimeout(enterApp, 5000);
 let appRendered = false;
 
 function enterApp() {
