@@ -32,7 +32,7 @@ python -m http.server 8000
 
 ## 静态发布
 
-当前 GitHub Pages 地址：`https://zy1020.github.io/meiwei-h5/`。扫描项目根目录的 `meiwei-qr.png` 即可从加载页进入；等待 2 秒自动进入首页，也可以点击图片中的“跳过”。
+当前 GitHub Pages 地址：`https://zy1020.github.io/meiwei-h5/`。扫描项目根目录的 `meiwei-qr.png` 即可从加载页进入；二维码入口带有缓存版本参数，等待 2 秒自动进入首页，也可以点击图片中的“跳过”。
 
 发布前请确认图片素材授权与实际品牌使用范围；购物车和订单仍只保存在访问者当前浏览器的 `localStorage` 中。
 
@@ -45,5 +45,5 @@ python generate_qr.py https://你的实际网址/
 本项目实际生成命令：
 
 ```powershell
-python generate_qr.py https://zy1020.github.io/meiwei-h5/
+python generate_qr.py "https://zy1020.github.io/meiwei-h5/?v=20261105-4"
 ```
