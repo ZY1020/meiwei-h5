@@ -1,30 +1,49 @@
-# 美味餐厅 H5 点餐演示
+# 蒸知味 H5 点餐演示
 
-原微信小程序菜单数据已迁移为静态网页，无框架、无后端、无云数据库。支持分类、购物车、提交模拟订单、历史订单。所有订单只保存在当前浏览器 localStorage 中，**不会被商家收到**。微信内置浏览器和电脑浏览器之间不会同步历史订单；用户清理缓存后历史订单可能丢失。
+根据“蒸知味”小程序界面稿实现的移动端单页 H5。项目使用原生 HTML、CSS 和 JavaScript，无框架、无后端，适合本地演示和静态托管。
+
+## 已实现页面
+
+- 5 秒品牌加载页，可点击“跳过”直接进入。
+- 首页：堂食/打包入口、今日蒸鲜、会员中心、蓝印故事。
+- 菜单：22 道菜、分类定位、搜索、菜品规格、数量与购物车联动。
+- 确认订单：堂食/打包切换、备注、满 50 元减 10 元演示券、金额计算。
+- 订单：全部/进行中/已完成、制作进度、继续加菜、再来一单。
+- 我的：会员数据、订单快捷入口、常用服务。
+- 会员中心、蓝印故事纹样切换、到店体验加载失败页。
+
+购物车、演示订单和会员券只保存在当前浏览器的 `localStorage` 中，不会发送给真实门店，也不包含真实支付。
 
 ## 本地预览
 
-可直接双击 index.html；如浏览器限制本地资源，可在目录中执行 `python -m http.server 8000`，打开 http://localhost:8000 。
+在项目目录执行：
 
-## 免费发布到 GitHub Pages
+```powershell
+python -m http.server 8000
+```
 
-1. 登录 https://github.com/ ，新建 Public 仓库，名称建议 `meiwei-h5`。
-2. 解压 ZIP 后，将 `index.html`、`styles.css`、`script.js`、`assets` 文件夹直接上传到仓库根目录（不是上传 ZIP）。`README.md` 和 `generate_qr.py` 可选。
-3. 仓库 Settings -> Pages -> Build and deployment -> Source 选择 Deploy from a branch；Branch 选择 main，目录选择 /(root)，保存。
-4. 等待 GitHub Pages 部署完成。常见地址是 `https://你的GitHub用户名.github.io/meiwei-h5/`，以 Pages 页面显示的实际地址为准。
-5. 手机微信直接打开网址测试：添加菜品、提交订单、历史订单。
-6. 生成二维码：在电脑上执行 `python -m pip install "qrcode[pil]"`，然后 `python generate_qr.py https://你的实际网址/`，会输出 `meiwei-qr.png`。也可以使用可信二维码生成器粘贴实际网址生成。
-7. 手机微信扫一扫生成的二维码即可进入网页。扫码打开的是微信内网页，不是微信原生小程序。
+然后访问 `http://127.0.0.1:8000/`。推荐使用浏览器移动设备模式检查 390 × 844、375 × 812 等常见手机尺寸。
 
-## 免费费用和限制
+## 设计素材
 
-- 项目代码本身零成本，GitHub Pages 对符合其条款的公开仓库提供免费静态网站托管，具体使用限额和服务政策以 GitHub 官方说明为准。
-- GitHub Pages 网站源码所在的 Public 仓库可被公开查看，请勿放置密码、密钥、个人信息。
-- 适合个人学习与非商业演示。GitHub Pages 不适合作为在线商业交易或真实餐厅运营的托管服务。
-- 部署后 HTTPS 通常由 GitHub Pages 提供，不必单独购买域名。
-- GitHub 服务在不同网络环境下的可访问性不同，务必用目标用户的手机微信实际测试。
-- 本项目不收集客户个人信息、不提供在线支付，也不会把订单发送到商家。
+- 运行 `scripts/extract-design-assets.ps1` 可从默认的桌面设计稿目录重新生成 `assets/brand/` 下的网页素材。
+- 可通过 `-DesignRoot` 和 `-OutputRoot` 参数指定其他设计稿与输出目录。
+- 网页使用的是从无批注原稿中提取的图片，不会显示需求图中的红色标注。
 
-## 修改菜单
+## 静态发布
 
-编辑 `script.js` 开头 `dishes` 数组中的 `name`、`price`、`emoji`、`desc`、`category`，保存后重新上传即可。
+当前 GitHub Pages 地址：`https://zy1020.github.io/meiwei-h5/`。扫描项目根目录的 `meiwei-qr.png` 即可从加载页进入；等待 5 秒自动进入首页，也可以点击“跳过”。
+
+发布前请确认图片素材授权与实际品牌使用范围；购物车和订单仍只保存在访问者当前浏览器的 `localStorage` 中。
+
+如需二维码，可执行：
+
+```powershell
+python generate_qr.py https://你的实际网址/
+```
+
+本项目实际生成命令：
+
+```powershell
+python generate_qr.py https://zy1020.github.io/meiwei-h5/
+```
